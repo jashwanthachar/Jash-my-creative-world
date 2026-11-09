@@ -20,11 +20,19 @@ destinations.
   atmospheric overlay.
 - **Interactive orbital navigation:** Drag the orbit horizontally to rotate
   its five destinations; select a destination by clicking or tapping.
-- **Five destinations:** About Me, Playlist, Contact, My Links, and Socials
+- **Five destinations:** About Me, Skills, Contact, My Links, and Socials
   use the existing shared destination panel.
 - **About Me experience:** An introduction, Computer Science Engineering
   journey, interests, technical skills, selected projects, and future
   ambition.
+- **Skills showcase:** Seven technology cards use local Devicon logos and open
+  into detail views for learning notes, practical projects, and certificates.
+  Certificate details are intentionally placeholders until verified
+  information is available.
+- **Contact experience:** Contact methods and a client-validated form are
+  available in the Contact destination, including email, phone, LinkedIn, and
+  GitHub links. The form is a frontend prototype and does not send or store
+  submissions until a backend or form service is configured.
 - **Responsive presentation:** The layout adapts to smaller screens, and the
   About Me content changes to a single-column layout on narrow viewports.
 - **Accessibility details:** Destination selection updates pressed states;
@@ -50,11 +58,20 @@ JASH-CREATIVE-WORLD/
 │   ├── audio/
 │   │   └── .gitkeep
 │   ├── icons/
-│   │   └── .gitkeep
+│   │   └── skills/
+│   │       ├── c.svg
+│   │       ├── css.svg
+│   │       ├── html.svg
+│   │       ├── java.svg
+│   │       ├── javascript.svg
+│   │       ├── mysql.svg
+│   │       └── python.svg
 │   └── images/
 │       ├── .gitkeep
 │       ├── background-world1.png
 │       └── background-world2.png
+├── assets/certificates/
+│   └── .gitkeep
 ├── css/
 │   └── style.css
 ├── js/
@@ -66,7 +83,9 @@ JASH-CREATIVE-WORLD/
 
 `background-world1.png` is used as the page background. The second image is
 present in the repository but is not currently referenced by the website.
-The project does not currently include screenshots.
+Technology logo SVGs are stored locally and sourced from
+[Devicon](https://github.com/devicons/devicon). The project does not currently
+include screenshots or certificate files.
 
 ## Run locally
 
@@ -99,15 +118,17 @@ information that should not be public.
 
 ## Current development status
 
-The core portfolio shell, orbital interaction, shared destination panel, and
-About Me experience are implemented. The other four destinations open their
-panels, but currently contain introductory placeholder content rather than
-their full planned experiences.
+The core portfolio shell, orbital interaction, shared destination panel,
+About Me experience, Skills showcase, and Contact form prototype are
+implemented. The Contact form does not transmit submissions. My Links and
+Socials currently contain introductory placeholder content rather than their
+full planned experiences.
 
 ## Roadmap
 
-- Build an interactive playlist experience.
-- Develop the Contact destination with useful contact information.
+- Add verified skill topics, practical work, and certificate records.
+- Add confirmed email and LinkedIn details and connect a backend or form
+  service for Contact submissions.
 - Add project details and confirmed professional links.
 - Add confirmed social profile information.
 - Continue refining transitions, animation, and responsive behavior.
