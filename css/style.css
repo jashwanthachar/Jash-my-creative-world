@@ -25,7 +25,6 @@ html {
     z-index: -2;
 
     background-image: url("../assets/images/background-world1.jpg");
-
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -35,7 +34,17 @@ html {
 
 @media (max-width: 767px) {
     .background {
-        background-image: url("../assets/images/background-world2.jpg");
+        background-image:
+            linear-gradient(
+                to bottom,
+                rgba(10, 15, 25, 0) 0%,
+                rgba(10, 15, 25, 0) 30%,
+                rgba(10, 15, 25, 0.95) 45%,
+                rgba(10, 15, 25, 1) 100%
+            ),
+            url("../assets/images/background-world2.jpg");
+        background-position: center top;
+        background-attachment: fixed;
     }
 }
 
@@ -2537,5 +2546,30 @@ a.social-card:hover .social-card-arrow {
         animation: none !important;
         scroll-behavior: auto !important;
         transition: none !important;
+    }
+}
+
+@media (max-width: 767px) {
+    .background-overlay {
+        background: transparent;
+    }
+
+    .landing-section {
+        min-height: 0;
+        justify-content: flex-start;
+        align-items: stretch;
+    }
+
+    .orbit-section {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding: 2vh 0 0;
+        margin-bottom: 50px;
+    }
+
+    .destination-page,
+    .home-content {
+        background: transparent;
     }
 }
