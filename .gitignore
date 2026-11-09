@@ -1,0 +1,25 @@
+# Local environment and credentials
+.env
+.env.*
+!.env.example
+*.pem
+*.p12
+*.pfx
+
+# Local editor and operating-system files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
+*.code-workspace
+
+# Dependencies, generated output, and logs
+node_modules/
+dist/
+build/
+coverage/
+*.log
+
+# Local project planning document (not needed to run the public website)
+/master-plan

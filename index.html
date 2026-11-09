@@ -1,0 +1,119 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="theme-color" content="#07111f">
+
+    <title>JASH | My Creative World</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+    <!-- Fixed background -->
+    <div class="background"></div>
+    <div class="background-overlay"></div>
+
+    <!-- Main website -->
+    <main id="app">
+
+    <!-- HERO INTRODUCTION -->
+    <section class="hero">
+
+        <p class="hero-eyebrow">
+            A CREATIVE MIND. A DIFFERENT WORLD.
+        </p>
+
+        <h1>JASH<span>.</span></h1>
+
+        <p class="hero-role">
+            Developer / AI Enthusiast / Creative Explorer
+        </p>
+
+    </section>
+
+    <!-- ORBITAL NAVIGATION -->
+    <section class="orbit-section">
+
+        <div class="orbit-container">
+
+            <!-- Golden orbital paths -->
+            <div class="orbit orbit-outer"></div>
+            <div class="orbit orbit-inner"></div>
+
+            <!-- Navigation destinations -->
+            <div class="orbit-items">
+
+                <button class="orbit-item" data-destination="about">
+                    <span class="orbit-icon">♙</span>
+                    <span class="orbit-label">About Me</span>
+                </button>
+
+                <button class="orbit-item" data-destination="playlist">
+                    <span class="orbit-icon">♫</span>
+                    <span class="orbit-label">Playlist</span>
+                </button>
+
+                <button class="orbit-item" data-destination="contact">
+                    <span class="orbit-icon">➤</span>
+                    <span class="orbit-label">Contact</span>
+                </button>
+
+                <button class="orbit-item" data-destination="links">
+                    <span class="orbit-icon">↗</span>
+                    <span class="orbit-label">My Links</span>
+                </button>
+
+                <button class="orbit-item" data-destination="socials">
+                    <span class="orbit-icon">◎</span>
+                    <span class="orbit-label">Socials</span>
+                </button>
+
+            </div>
+
+        </div>
+
+        <p class="orbit-instruction">
+            ↻ DRAG TO ROTATE · TAP TO SELECT
+        </p>
+
+<!-- DESTINATION PANEL -->
+<section
+    class="destination-panel"
+    id="destination-panel"
+    aria-hidden="true"
+    aria-labelledby="panel-title"
+    inert
+>
+    <button class="panel-close" id="panel-close" aria-label="Close panel">
+        ×
+    </button>
+
+    <div class="panel-content">
+        <p class="panel-eyebrow">WELCOME TO MY WORLD</p>
+        <h2 id="panel-title">About Me</h2>
+        <div id="panel-body"></div>
+    </div>
+</section>
+
+
+    </section>
+
+</main>
+
+    <!-- JavaScript -->
+    <script src="js/script.js"></script>
+
+</body>
+</html>
