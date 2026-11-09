@@ -1,119 +1,79 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <meta name="theme-color" content="#07111f">
-
+    <meta name="description" content="Enter Jash's creative world: an immersive portfolio of software projects, skills, jewellery design, and creative work.">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="JASH | My Creative World">
+    <meta property="og:description" content="Enter Jash's creative world: an immersive portfolio of software projects, skills, jewellery design, and creative work.">
     <title>JASH | My Creative World</title>
-
-    <!-- Google Fonts -->
+    <link rel="icon" type="image/svg+xml" href="assets/icons/favicon.svg">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-
-    <!-- CSS -->
     <link rel="stylesheet" href="css/style.css">
 </head>
+<body data-page="home">
+    <div class="background" aria-hidden="true"></div>
+    <div class="background-overlay" aria-hidden="true"></div>
 
-<body>
-
-    <!-- Fixed background -->
-    <div class="background"></div>
-    <div class="background-overlay"></div>
-
-    <!-- Main website -->
-    <main id="app">
-
-    <!-- HERO INTRODUCTION -->
-    <section class="hero">
-
-        <p class="hero-eyebrow">
-            A CREATIVE MIND. A DIFFERENT WORLD.
-        </p>
-
-        <h1>JASH<span>.</span></h1>
-
-        <p class="hero-role">
-            Developer / AI Enthusiast / Creative Explorer
-        </p>
-
-    </section>
-
-    <!-- ORBITAL NAVIGATION -->
-    <section class="orbit-section">
-
-        <div class="orbit-container">
-
-            <!-- Golden orbital paths -->
-            <div class="orbit orbit-outer"></div>
-            <div class="orbit orbit-inner"></div>
-
-            <!-- Navigation destinations -->
-            <div class="orbit-items">
-
-                <button class="orbit-item" data-destination="about">
-                    <span class="orbit-icon">♙</span>
-                    <span class="orbit-label">About Me</span>
-                </button>
-
-                <button class="orbit-item" data-destination="skills">
-                    <span class="orbit-icon">&lt;/&gt;</span>
-                    <span class="orbit-label">Skills</span>
-                </button>
-
-                <button class="orbit-item" data-destination="contact">
-                    <span class="orbit-icon">➤</span>
-                    <span class="orbit-label">Contact</span>
-                </button>
-
-                <button class="orbit-item" data-destination="projects">
-                    <span class="orbit-icon">↗</span>
-                    <span class="orbit-label">My Projects</span>
-                </button>
-
-                <button class="orbit-item" data-destination="socials">
-                    <span class="orbit-icon">◎</span>
-                    <span class="orbit-label">Socials</span>
-                </button>
-
-            </div>
-
+    <header class="landing-section" id="home">
+        <a class="site-mark" href="index.html" aria-label="JASH home">J<span>.</span></a>
+        <div class="hero">
+            <p class="hero-eyebrow">A CREATIVE MIND. A DIFFERENT WORLD.</p>
+            <h1 id="hero-title">JASH<span>.</span></h1>
+            <p class="hero-role">Developer / AI Enthusiast / Creative Explorer</p>
         </div>
+        <section class="orbit-section" aria-label="Explore the portfolio">
+            <div class="orbit-container">
+                <svg class="orbit-paths" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+                    <path class="orbit-path orbit-path-outer" d="M 2 28 C 25 58, 75 58, 98 28" />
+                    <path class="orbit-path orbit-path-middle" d="M 4 31 C 27 55, 73 55, 96 31" />
+                    <path class="orbit-path orbit-path-inner" d="M 6 34 C 29 52, 71 52, 94 34" />
+                </svg>
+                <nav class="orbit-items" aria-label="Portfolio destinations">
+                    <a class="orbit-item" href="about.html#open-destination" data-destination="about">
+                        <span class="orbit-icon" aria-hidden="true">♙</span>
+                        <span class="orbit-label">About Me</span>
+                    </a>
+                    <a class="orbit-item" href="skills.html#open-destination" data-destination="skills">
+                        <span class="orbit-icon" aria-hidden="true">&lt;/&gt;</span>
+                        <span class="orbit-label">Skills</span>
+                    </a>
+                    <a class="orbit-item" href="projects.html#open-destination" data-destination="projects">
+                        <span class="orbit-icon" aria-hidden="true">↗</span>
+                        <span class="orbit-label">My Projects</span>
+                    </a>
+                    <a class="orbit-item" href="contact.html#open-destination" data-destination="contact">
+                        <span class="orbit-icon" aria-hidden="true">➤</span>
+                        <span class="orbit-label">Contact</span>
+                    </a>
+                    <a class="orbit-item" href="socials.html#open-destination" data-destination="socials">
+                        <span class="orbit-icon" aria-hidden="true">◎</span>
+                        <span class="orbit-label">Socials</span>
+                    </a>
+                </nav>
+            </div>
+            <p class="orbit-instruction"><span aria-hidden="true">↻</span> DRAG TO ROTATE · TAP TO SELECT</p>
+        </section>
+        <p class="home-prompt">SELECT YOUR DESTINATION <span>01 / 05</span></p>
+    </header>
 
-        <p class="orbit-instruction">
-            ↻ DRAG TO ROTATE · TAP TO SELECT
-        </p>
+    <main class="home-content">
+        <p class="home-content-kicker">WELCOME TO MY WORLD</p>
+        <h2>Choose your path<span>.</span></h2>
+        <p>A few doors into my creative world.</p>
+        <nav class="home-destinations" aria-label="Explore portfolio chapters">
+            <a href="about.html#open-destination">About Me <span aria-hidden="true">↗</span></a>
+            <a href="skills.html#open-destination">Skills <span aria-hidden="true">↗</span></a>
+            <a href="projects.html#open-destination">My Projects <span aria-hidden="true">↗</span></a>
+            <a href="contact.html#open-destination">Contact <span aria-hidden="true">↗</span></a>
+            <a href="socials.html#open-destination">Socials <span aria-hidden="true">↗</span></a>
+        </nav>
+    </main>
 
-<!-- DESTINATION PANEL -->
-<section
-    class="destination-panel"
-    id="destination-panel"
-    aria-hidden="true"
-    aria-labelledby="panel-title"
-    inert
->
-    <button class="panel-close" id="panel-close" aria-label="Close panel">
-        ×
-    </button>
-
-    <div class="panel-content">
-        <p class="panel-eyebrow">WELCOME TO MY WORLD</p>
-        <h2 id="panel-title">About Me</h2>
-        <div id="panel-body"></div>
-    </div>
-</section>
-
-
-    </section>
-
-</main>
-
-    <!-- JavaScript -->
     <script src="js/script.js"></script>
-
 </body>
 </html>

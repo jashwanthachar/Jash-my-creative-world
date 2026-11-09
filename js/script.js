@@ -3,58 +3,223 @@ console.log("Welcome to JASH Creative World!");
 console.log("Our immersive portfolio journey begins.");
 
 // ======================================
-// JASH — ORBITAL NAVIGATION ENGINE
+// JASH — ORBITAL PORTFOLIO NAVIGATION
 // ======================================
 
-const orbitContainer = document.querySelector(".orbit-container");
 const orbitItems = [...document.querySelectorAll(".orbit-item")];
+const orbitContainer = document.querySelector(".orbit-container");
+const pageContent = document.getElementById("destination-content");
+const currentPage = document.body.dataset.page;
+const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+const horizontalOrbitPositions = [
+    { x: 7, y: 32 },
+    { x: 28, y: 44 },
+    { x: 50, y: 48 },
+    { x: 72, y: 44 },
+    { x: 93, y: 32 }
+];
+const verticalOrbitPositions = [
+    { x: 22, y: 12 },
+    { x: 42, y: 31 },
+    { x: 49, y: 50 },
+    { x: 42, y: 69 },
+    { x: 22, y: 88 }
+];
+const horizontalOrbitPaths = [
+    "M 2 28 C 25 58, 75 58, 98 28",
+    "M 4 31 C 27 55, 73 55, 96 31",
+    "M 6 34 C 29 52, 71 52, 94 34"
+];
+const verticalOrbitPaths = [
+    "M 20 10 C 38 12, 60 28, 60 50 C 60 72, 38 88, 20 90",
+    "M 22 11 C 39 14, 57 29, 57 50 C 57 71, 39 86, 22 89",
+    "M 24 12 C 40 16, 54 30, 54 50 C 54 70, 40 84, 24 88"
+];
 
-let rotation = -90;
+const activeDestination = currentPage === "home" ? "about" : currentPage;
+const activeIndex = Math.max(
+    0,
+    orbitItems.findIndex(item => item.dataset.destination === activeDestination)
+);
+
+let rotation = 2 - activeIndex;
 let isDragging = false;
 let startX = 0;
 let startRotation = 0;
 let moved = false;
+let suppressClick = false;
+let startedOnLink = false;
 
-const reducedMotion = window.matchMedia(
-    "(prefers-reduced-motion: reduce)"
-);
+function wrapIndex(index, length) {
+    return ((index % length) + length) % length;
+}
 
-const destinations = [
-    "about",
-    "skills",
-    "contact",
-    "projects",
-    "socials"
-];
-
-// Position all five destinations around an ellipse.
 function renderOrbit() {
-    const width = orbitContainer.clientWidth;
-    const height = orbitContainer.clientHeight;
+    if (!orbitContainer) return;
 
-    const radiusX = width * 0.40;
-    const radiusY = height * 0.34;
+    const vertical = window.matchMedia("(min-width: 960px)").matches;
+    const positions = vertical ? verticalOrbitPositions : horizontalOrbitPositions;
+    const pathData = vertical ? verticalOrbitPaths : horizontalOrbitPaths;
 
-    const centerX = width / 2;
-    const centerY = height / 2;
+    orbitContainer.querySelectorAll(".orbit-path").forEach((path, index) => {
+        path.setAttribute("d", pathData[index]);
+    });
 
     orbitItems.forEach((item, index) => {
-        const angle =
-            (rotation + index * (360 / orbitItems.length))
-            * Math.PI / 180;
+        const slot = wrapIndex(index + rotation, positions.length);
+        const fromIndex = Math.floor(slot);
+        const progress = slot - fromIndex;
+        const from = positions[fromIndex];
+        const to = positions[(fromIndex + 1) % positions.length];
+        let x;
+        let y;
 
-        const x = centerX + Math.cos(angle) * radiusX;
-        const y = centerY + Math.sin(angle) * radiusY;
+        if (fromIndex === positions.length - 1) {
+            const inverse = 1 - progress;
+            const firstControl = vertical ? { x: 5, y: 100 } : { x: 100, y: 16 };
+            const secondControl = vertical ? { x: 5, y: 0 } : { x: 0, y: 16 };
+            x = inverse ** 3 * from.x
+                + 3 * inverse ** 2 * progress * firstControl.x
+                + 3 * inverse * progress ** 2 * secondControl.x
+                + progress ** 3 * to.x;
+            y = inverse ** 3 * from.y
+                + 3 * inverse ** 2 * progress * firstControl.y
+                + 3 * inverse * progress ** 2 * secondControl.y
+                + progress ** 3 * to.y;
+        } else {
+            const previous = positions[wrapIndex(fromIndex - 1, positions.length)];
+            const next = positions[(fromIndex + 2) % positions.length];
+            const progressSquared = progress ** 2;
+            const progressCubed = progressSquared * progress;
+            x = 0.5 * (
+                2 * from.x
+                + (-previous.x + to.x) * progress
+                + (2 * previous.x - 5 * from.x + 4 * to.x - next.x) * progressSquared
+                + (-previous.x + 3 * from.x - 3 * to.x + next.x) * progressCubed
+            );
+            y = 0.5 * (
+                2 * from.y
+                + (-previous.y + to.y) * progress
+                + (2 * previous.y - 5 * from.y + 4 * to.y - next.y) * progressSquared
+                + (-previous.y + 3 * from.y - 3 * to.y + next.y) * progressCubed
+            );
+        }
 
-        item.style.left = `${x}px`;
-        item.style.top = `${y}px`;
+        item.style.left = `${x}%`;
+        item.style.top = `${y}%`;
     });
 }
 
-const destinationPanel = document.getElementById("destination-panel");
-const panelTitle = document.getElementById("panel-title");
-const panelBody = document.getElementById("panel-body");
-const closePanelButton = document.getElementById("panel-close");
+orbitItems.forEach(item => {
+    const isCurrent = item.dataset.destination === currentPage;
+    const isSelected = item.dataset.destination === activeDestination;
+
+    if (isCurrent) item.setAttribute("aria-current", "page");
+    item.dataset.active = String(isSelected);
+});
+
+orbitContainer?.addEventListener("pointerdown", event => {
+    if (event.button !== undefined && event.button !== 0) return;
+
+    isDragging = true;
+    moved = false;
+    suppressClick = false;
+    startedOnLink = Boolean(event.target.closest(".orbit-item"));
+    startX = event.clientX;
+    startRotation = rotation;
+    orbitContainer.classList.add("dragging");
+});
+
+window.addEventListener("pointermove", event => {
+    if (!isDragging) return;
+
+    const difference = event.clientX - startX;
+    if (Math.abs(difference) > 4) moved = true;
+
+    rotation = startRotation - difference * orbitItems.length / orbitContainer.clientWidth;
+    renderOrbit();
+});
+
+function stopDragging() {
+    if (!isDragging) return;
+
+    isDragging = false;
+    orbitContainer.classList.remove("dragging");
+
+    suppressClick = moved && startedOnLink;
+}
+
+window.addEventListener("pointerup", stopDragging);
+window.addEventListener("pointercancel", stopDragging);
+orbitContainer?.addEventListener("click", event => {
+    if (!suppressClick || event.detail === 0) return;
+
+    suppressClick = false;
+    event.preventDefault();
+    event.stopPropagation();
+});
+window.addEventListener("resize", renderOrbit);
+renderOrbit();
+
+orbitItems.forEach((item, index) => {
+    item.addEventListener("click", event => {
+        if (suppressClick) {
+            event.preventDefault();
+            event.stopPropagation();
+            suppressClick = false;
+            return;
+        }
+
+        if (
+            event.defaultPrevented
+            || event.button !== 0
+            || event.metaKey
+            || event.ctrlKey
+            || event.shiftKey
+            || event.altKey
+        ) return;
+
+        event.preventDefault();
+        orbitItems.forEach(orbitItem => {
+            orbitItem.dataset.active = String(orbitItem === item);
+        });
+
+        if (item.dataset.destination === currentPage && pageContent) {
+            pageContent.scrollIntoView({
+                behavior: reducedMotion.matches ? "auto" : "smooth",
+                block: "start"
+            });
+            return;
+        }
+
+        const baseRotation = 2 - index;
+        const targetRotation = baseRotation
+            + Math.round((rotation - baseRotation) / orbitItems.length) * orbitItems.length;
+        const initialRotation = rotation;
+        const rotationChange = targetRotation - initialRotation;
+        const startTime = performance.now();
+        const duration = reducedMotion.matches ? 0 : 560;
+
+        function animateSelection(now) {
+            const progress = duration === 0
+                ? 1
+                : Math.min((now - startTime) / duration, 1);
+            const easedProgress = 1 - (1 - progress) ** 3;
+
+            rotation = initialRotation + rotationChange * easedProgress;
+            renderOrbit();
+
+            if (progress < 1) {
+                requestAnimationFrame(animateSelection);
+                return;
+            }
+
+            window.location.href = item.href;
+        }
+
+        requestAnimationFrame(animateSelection);
+    });
+});
 
 const skills = [
     {
@@ -140,11 +305,11 @@ const skills = [
 
 const certificates = [
     {
-        title: "To be added",
-        issuer: "To be added",
+        title: "Diploma in Computer Aided Jewellery Designing",
+        issuer: "Solitaire Diamond Institute",
         skillId: "jewellery-cad",
-        completionDate: "To be added",
-        image: "",
+        completionDate: "October 2026",
+        image: "assets/images/cad/CAD-CERTIFICATE.jpeg",
         pdf: "",
         verificationUrl: ""
     }
@@ -160,7 +325,7 @@ function renderSkillCards() {
         >
             <span class="skill-card-top">
                 ${skill.logo
-                    ? `<img class="skill-logo" src="${skill.logo}" alt="">`
+                    ? `<img class="skill-logo" src="${skill.logo}" alt="" loading="lazy" decoding="async">`
                     : `<span class="skill-logo skill-logo-placeholder" aria-hidden="true">CAD</span>`}
                 <span class="skill-card-arrow" aria-hidden="true">↗</span>
             </span>
@@ -234,7 +399,7 @@ function renderCertificateEntries(skillId = null) {
                         : `<span>Verification URL not provided</span>`}
                 </div>
                 ${certificate.image
-                    ? `<img class="certificate-image" src="${certificate.image}" alt="${certificate.title || "Certificate"}">`
+                    ? `<img class="certificate-image" src="${certificate.image}" alt="${certificate.title || "Certificate"}" loading="lazy" decoding="async">`
                     : ""}
             </article>
         `;
@@ -303,7 +468,7 @@ function renderSkillDetails(skill) {
 
             <header class="skill-detail-heading">
                 ${skill.logo
-                    ? `<img class="skill-logo" src="${skill.logo}" alt="">`
+                    ? `<img class="skill-logo" src="${skill.logo}" alt="" loading="lazy" decoding="async">`
                     : `<span class="skill-logo skill-logo-placeholder" aria-hidden="true">CAD</span>`}
                 <div>
                     <p class="skill-status">${skill.status}</p>
@@ -446,7 +611,95 @@ const cadCategories = [
     { id: "other", title: "Other Jewellery Designs" }
 ];
 
-const cadDesigns = [];
+const cadDesigns = [
+    {
+        id: "ring",
+        category: "rings",
+        name: "Ring",
+        description: "A rendered ring design created in Rhinoceros 3D.",
+        software: "Rhinoceros 3D (Rhino 8)",
+        details: "",
+        images: [
+            {
+                src: "assets/images/cad/RING.jpeg",
+                alt: "Rendered ring design with a green centre stone"
+            }
+        ]
+    },
+    {
+        id: "necklace",
+        category: "necklaces",
+        name: "Necklace",
+        description: "A rendered necklace design created in Rhinoceros 3D.",
+        software: "Rhinoceros 3D (Rhino 8)",
+        details: "",
+        images: [
+            {
+                src: "assets/images/cad/NECKLACE.jpeg",
+                alt: "Rendered gold necklace design"
+            }
+        ]
+    },
+    {
+        id: "jhumka",
+        category: "earrings-jhumkas",
+        name: "Jhumka Earrings",
+        description: "A rendered pair of jhumka earrings created in Rhinoceros 3D.",
+        software: "Rhinoceros 3D (Rhino 8)",
+        details: "",
+        images: [
+            {
+                src: "assets/images/cad/JHUMKA.jpeg",
+                alt: "Rendered pair of gold jhumka earrings"
+            }
+        ]
+    },
+    {
+        id: "bangle",
+        category: "bracelets",
+        name: "Bangle",
+        description: "A rendered bangle design created in Rhinoceros 3D.",
+        software: "Rhinoceros 3D (Rhino 8)",
+        details: "",
+        images: [
+            {
+                src: "assets/images/cad/BANGLE.jpeg",
+                alt: "Rendered gold bangle design"
+            }
+        ]
+    },
+    {
+        id: "pendant",
+        category: "other",
+        name: "Pendant",
+        description: "A rendered pendant design created in Rhinoceros 3D.",
+        software: "Rhinoceros 3D (Rhino 8)",
+        details: "",
+        images: [
+            {
+                src: "assets/images/cad/PENDENT.jpeg",
+                alt: "Rendered gold pendant design with gemstone details"
+            }
+        ]
+    }
+];
+
+const cadDocuments = [
+    {
+        id: "cad-certificate",
+        title: "Diploma in Computer Aided Jewellery Designing",
+        kind: "Certificate",
+        src: "assets/images/cad/CAD-CERTIFICATE.jpeg",
+        alt: "Diploma certificate from Solitaire Diamond Institute"
+    },
+    {
+        id: "cad-marks-sheet",
+        title: "Computer Aided Jewellery Designing",
+        kind: "Marks Sheet",
+        src: "assets/images/cad/CAD-MARKS-SHEET.jpeg",
+        alt: "Marks sheet for the Computer Aided Jewellery Designing diploma"
+    }
+];
 
 const attendedEvents = [
     {
@@ -460,8 +713,8 @@ const attendedEvents = [
         organizer: "",
         images: [],
         certificateImage: "",
-        certificatePdf: "",
-        certificateTitle: ""
+        certificatePdf: "assets/images/events/Buildathon-Certificate.pdf",
+        certificateTitle: "Buildathon Certificate"
     },
     {
         id: "codeverse",
@@ -524,7 +777,7 @@ const projectSections = [
         id: "cad",
         number: "03",
         title: "CAD Jewellery Works",
-        description: "Jewellery design and 3D modelling work using Rhinoceros 3D (Rhino 8)."
+        description: "A luxury gallery of original jewellery designs modelled in Rhinoceros 3D (Rhino 8)."
     },
     {
         id: "events",
@@ -536,7 +789,7 @@ const projectSections = [
 
 function renderMedia(image, label, className = "project-media") {
     return image
-        ? `<img class="${className}" src="${image}" alt="${label}">`
+        ? `<img class="${className}" src="${image}" alt="${label}" loading="lazy" decoding="async">`
         : `
             <div class="${className} project-media-placeholder" role="img" aria-label="${label} image to be added">
                 <span class="media-placeholder-mark" aria-hidden="true">✦</span>
@@ -722,14 +975,43 @@ function renderCadGallery() {
     return `
         <div class="project-subview cad-gallery-view">
             ${renderProjectBackButton()}
-            <header class="project-subview-heading">
-                <p class="projects-kicker">03 / RHINOCEROS 3D · RHINO 8</p>
+            <header class="cad-gallery-intro">
+                <p class="projects-kicker">03 / THE DESIGN ATELIER · RHINOCEROS 3D</p>
                 <h3>CAD Jewellery Works</h3>
                 <p>
-                    A growing jewellery design and 3D modelling practice.
-                    Original renders will appear here as they are added.
+                    A study in form, light and fine detail. Explore a selection
+                    of original jewellery designs modelled in Rhino 8.
                 </p>
+                <span class="cad-gallery-rule" aria-hidden="true"></span>
             </header>
+            <section class="cad-documents" aria-labelledby="cad-documents-title">
+                <header class="cad-documents-heading">
+                    <p class="projects-kicker">CREDENTIALS &amp; RECORDS</p>
+                    <h3 id="cad-documents-title">A record of the craft.</h3>
+                    <p>Certificate and course marks from the CAD jewellery design diploma.</p>
+                </header>
+                <div class="cad-document-grid">
+                    ${cadDocuments.map(document => `
+                        <button
+                            class="cad-document-card"
+                            type="button"
+                            data-gallery-open="cad-document"
+                            data-gallery-id="${document.id}"
+                            data-gallery-index="0"
+                            aria-label="View ${document.kind}: ${document.title}"
+                        >
+                            <span class="cad-document-image">
+                                ${renderMedia(document.src, document.alt)}
+                            </span>
+                            <span class="cad-document-copy">
+                                <span class="cad-document-kind">${document.kind}</span>
+                                <span class="cad-document-title">${document.title}</span>
+                                <span class="cad-document-action">View record <span aria-hidden="true">↗</span></span>
+                            </span>
+                        </button>
+                    `).join("")}
+                </div>
+            </section>
             ${cadCategories.map(category => {
                 const designs = cadDesigns.filter(design => design.category === category.id);
 
@@ -747,11 +1029,14 @@ function renderCadGallery() {
                                             class="cad-design-card"
                                             type="button"
                                             data-cad-design-id="${design.id}"
+                                            aria-label="Explore ${design.name} CAD design"
                                         >
-                                            ${renderMedia(design.images[0]?.src, design.name)}
-                                            <span class="cad-design-name">${design.name}</span>
+                                            ${renderMedia(design.images[0]?.src, design.images[0]?.alt || design.name)}
+                                            <span class="cad-design-meta">
+                                                <span class="cad-design-name">${design.name}</span>
+                                                <span class="cad-design-open" aria-hidden="true">↗</span>
+                                            </span>
                                             <span class="cad-design-description">${design.description}</span>
-                                            <span class="text-action">View design <span aria-hidden="true">→</span></span>
                                         </button>
                                     `).join("")}
                                 </div>
@@ -760,7 +1045,7 @@ function renderCadGallery() {
                     </section>
                 `;
             }).join("")}
-            <p class="cad-software-note">CAD software: Rhinoceros 3D (Rhino 8)</p>
+            <p class="cad-software-note">Designed in Rhinoceros 3D (Rhino 8).</p>
         </div>
     `;
 }
@@ -920,6 +1205,11 @@ function getGalleryImages(type, id) {
         return cadDesigns.find(design => design.id === id)?.images || [];
     }
 
+    if (type === "cad-document") {
+        const document = cadDocuments.find(item => item.id === id);
+        return document ? [{ src: document.src, alt: document.alt }] : [];
+    }
+
     if (type === "jewels") {
         return skJewelsSections.find(section => section.id === id)?.images || [];
     }
@@ -953,7 +1243,7 @@ function renderGalleryViewer(type, id, index) {
                 <span aria-hidden="true">←</span> Back to details
             </button>
             <div class="image-viewer-stage">
-                <img src="${image.src}" alt="${image.alt || "Project gallery image"}">
+                <img src="${image.src}" alt="${image.alt || "Project gallery image"}" decoding="async">
                 ${images.length > 1
                     ? `
                         <div class="image-viewer-controls">
@@ -977,9 +1267,96 @@ function renderProjectView(sectionId) {
     return renderProjectsOverview();
 }
 
-const panelContent = {
+const socialProfiles = [
+    {
+        name: "LinkedIn",
+        description: "Professional networking and career journey.",
+        logo: "assets/icons/socials/linkedin.svg",
+        url: "https://www.linkedin.com/in/jashwanthachar-t-s?utm_source=share_via&utm_content=profile&utm_medium=member_android"
+    },
+    {
+        name: "GitHub",
+        description: "My coding projects and development journey.",
+        logo: "assets/icons/socials/github.svg",
+        url: "https://github.com/jashwanthachar"
+    },
+    {
+        name: "Instagram",
+        description: "Creative work, AI-generated visuals and jewellery content.",
+        logo: "assets/icons/socials/instagram.svg",
+        url: "https://www.instagram.com/jashwanth_achar?exln=dnpsZm5qaWFrZHNh"
+    },
+    {
+        name: "YouTube",
+        description: "Tech with Jash — technology, learning and development content.",
+        logo: "assets/icons/socials/youtube.svg",
+        url: "https://www.youtube.com/@TechWithJash-j6x"
+    },
+    {
+        name: "X",
+        description: "Short updates and conversations.",
+        logo: "assets/icons/socials/x.svg",
+        url: "https://x.com/Jashwanth_achar"
+    },
+    {
+        name: "Threads",
+        description: "Conversations and updates.",
+        logo: "assets/icons/socials/threads.svg",
+        url: "https://www.threads.com/@jashwanth_achar"
+    }
+];
+
+function renderSocialCards() {
+    return socialProfiles.map(profile => {
+        const cardContent = `
+            <span class="social-card-heading">
+                <img class="social-card-logo" src="${profile.logo}" alt="" loading="lazy" decoding="async">
+                <span class="social-card-arrow" aria-hidden="true">${profile.url ? "↗" : "○"}</span>
+            </span>
+            <span class="social-card-name">${profile.name}</span>
+            <span class="social-card-description">${profile.description}</span>
+            <span class="social-card-action">
+                ${profile.url ? `Visit ${profile.name} profile` : "Profile link to be added"}
+            </span>
+        `;
+
+        return profile.url
+            ? `
+                <a
+                    class="social-card"
+                    href="${profile.url}"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Visit ${profile.name} profile (opens in a new tab)"
+                >
+                    ${cardContent}
+                </a>
+            `
+            : `
+                <article class="social-card social-card-unavailable" aria-label="${profile.name} profile link to be added">
+                    ${cardContent}
+                </article>
+            `;
+    }).join("");
+}
+
+function renderSocials() {
+    return `
+        <div class="socials-experience">
+            <header class="socials-intro">
+                <p class="socials-kicker">MY DIGITAL PRESENCE</p>
+                <h3>FIND ME ACROSS THE DIGITAL WORLD.</h3>
+                <p>Let's connect, collaborate and create something meaningful.</p>
+            </header>
+            <div class="socials-grid" aria-label="Social profiles">
+                ${renderSocialCards()}
+            </div>
+        </div>
+    `;
+}
+
+const destinationPages = {
     about: {
-        title: "About Me",
         body: `
             <div class="about-experience">
                 <header class="about-intro">
@@ -1093,12 +1470,10 @@ const panelContent = {
     },
 
     skills: {
-        title: "Skills",
         body: renderSkillsOverview()
     },
 
     contact: {
-        title: "Contact",
         body: `
             <div class="contact-experience">
                 <header class="contact-intro">
@@ -1229,81 +1604,48 @@ const panelContent = {
     },
 
     projects: {
-        title: "My Projects",
         body: renderProjectsOverview()
     },
 
     socials: {
-        title: "Socials",
-        body: `
-            <h3>Find Me Online</h3>
-            <p>Connect with me through my social platforms.</p>
-            <p>LinkedIn · Instagram · YouTube</p>
-        `
+        body: renderSocials()
     }
 };
 
-let previousFocus = null;
-
-function selectDestination(item) {
-    const destination = item.dataset.destination;
-    const content = panelContent[destination];
-
-    if (!content) return;
-
-    orbitItems.forEach(button => {
-        button.classList.remove("active");
-        button.setAttribute("aria-pressed", "false");
-    });
-
-    item.classList.add("active");
-    item.setAttribute("aria-pressed", "true");
-
-    panelTitle.textContent = content.title;
-    panelBody.innerHTML = content.body;
-
-    previousFocus = item;
-
-    destinationPanel.classList.add("is-open");
-    destinationPanel.classList.toggle("is-about", destination === "about");
-    destinationPanel.classList.toggle("is-skills", destination === "skills");
-    destinationPanel.classList.toggle("is-contact", destination === "contact");
-    destinationPanel.classList.toggle("is-projects", destination === "projects");
-    destinationPanel.setAttribute("aria-hidden", "false");
-    destinationPanel.inert = false;
-
-    closePanelButton.focus();
-
-    console.log("Opened:", destination);
+if (pageContent && destinationPages[currentPage]) {
+    pageContent.innerHTML = destinationPages[currentPage].body;
 }
 
-function closeDestinationPanel() {
-    destinationPanel.classList.remove("is-open");
-    destinationPanel.classList.remove("is-about");
-    destinationPanel.classList.remove("is-skills");
-    destinationPanel.classList.remove("is-contact");
-    destinationPanel.classList.remove("is-projects");
-    destinationPanel.setAttribute("aria-hidden", "true");
-    destinationPanel.inert = true;
+if (location.hash === "#open-destination") {
+    const scrollToDestination = () => {
+        window.setTimeout(() => {
+            document.getElementById("destination-page")?.scrollIntoView({
+                behavior: reducedMotion.matches ? "auto" : "smooth",
+                block: "start"
+            });
+        }, 80);
+    };
 
-    if (previousFocus) {
-        previousFocus.focus();
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", scrollToDestination, { once: true });
+    } else {
+        scrollToDestination();
     }
 }
 
-closePanelButton.addEventListener("click", closeDestinationPanel);
+pageContent?.addEventListener("click", event => {
+    const sectionContent = event.target.closest(".destination-content");
+    if (!sectionContent) return;
 
-panelBody.addEventListener("click", event => {
     const skillButton = event.target.closest("[data-skill-id]");
 
-    if (skillButton) {
+    if (skillButton && currentPage === "skills") {
         const skill = skills.find(item => item.id === skillButton.dataset.skillId);
 
         if (!skill) return;
 
-        panelTitle.textContent = skill.name;
-        panelBody.innerHTML = renderSkillDetails(skill);
-        panelBody.querySelector("[data-back-to-skills]").focus();
+        sectionContent.innerHTML = renderSkillDetails(skill);
+        sectionContent.querySelector("[data-back-to-skills]").focus();
         return;
     }
 
@@ -1314,21 +1656,22 @@ panelBody.addEventListener("click", event => {
 
         if (!skill) return;
 
-        panelTitle.textContent = "Skills";
-        panelBody.innerHTML = renderSkillsOverview();
+        sectionContent.innerHTML = renderSkillsOverview();
 
-        const skillCard = [...panelBody.querySelectorAll("[data-skill-id]")]
+        const skillCard = [...sectionContent.querySelectorAll("[data-skill-id]")]
             .find(button => button.dataset.skillId === skill.id);
 
         skillCard?.focus();
         return;
     }
 
+    if (currentPage !== "projects") return;
+
     const projectSectionButton = event.target.closest("[data-project-section]");
 
     if (projectSectionButton) {
-        panelBody.innerHTML = renderProjectView(projectSectionButton.dataset.projectSection);
-        panelBody.querySelector(".project-back-button")?.focus();
+        sectionContent.innerHTML = renderProjectView(projectSectionButton.dataset.projectSection);
+        sectionContent.querySelector(".project-back-button")?.focus();
         return;
     }
 
@@ -1338,11 +1681,11 @@ panelBody.addEventListener("click", event => {
         const view = projectBackButton.dataset.projectBack;
         const itemId = projectBackButton.dataset.projectId;
 
-        panelBody.innerHTML = renderProjectView(view);
+        sectionContent.innerHTML = renderProjectView(view);
 
         const focusTarget = itemId
-            ? panelBody.querySelector(`[data-open-project="${itemId}"], [data-cad-design-id="${itemId}"], [data-event-id="${itemId}"]`)
-            : panelBody.querySelector(".project-back-button");
+            ? sectionContent.querySelector(`[data-open-project="${itemId}"], [data-cad-design-id="${itemId}"], [data-event-id="${itemId}"]`)
+            : sectionContent.querySelector(".project-back-button");
 
         focusTarget?.focus();
         return;
@@ -1355,8 +1698,8 @@ panelBody.addEventListener("click", event => {
 
         if (!project) return;
 
-        panelBody.innerHTML = renderSoftwareProjectDetails(project);
-        panelBody.querySelector(".project-back-button")?.focus();
+        sectionContent.innerHTML = renderSoftwareProjectDetails(project);
+        sectionContent.querySelector(".project-back-button")?.focus();
         return;
     }
 
@@ -1367,8 +1710,8 @@ panelBody.addEventListener("click", event => {
 
         if (!design) return;
 
-        panelBody.innerHTML = renderCadDesignDetails(design);
-        panelBody.querySelector(".project-back-button")?.focus();
+        sectionContent.innerHTML = renderCadDesignDetails(design);
+        sectionContent.querySelector(".project-back-button")?.focus();
         return;
     }
 
@@ -1379,8 +1722,8 @@ panelBody.addEventListener("click", event => {
 
         if (!selectedEvent) return;
 
-        panelBody.innerHTML = renderEventDetails(selectedEvent);
-        panelBody.querySelector(".project-back-button")?.focus();
+        sectionContent.innerHTML = renderEventDetails(selectedEvent);
+        sectionContent.querySelector(".project-back-button")?.focus();
         return;
     }
 
@@ -1394,8 +1737,8 @@ panelBody.addEventListener("click", event => {
 
         if (!image) return;
 
-        panelBody.innerHTML = renderGalleryViewer(type, id, index);
-        panelBody.querySelector(".project-back-button")?.focus();
+        sectionContent.innerHTML = renderGalleryViewer(type, id, index);
+        sectionContent.querySelector(".project-back-button")?.focus();
         return;
     }
 
@@ -1408,16 +1751,18 @@ panelBody.addEventListener("click", event => {
         if (type === "cad") {
             const design = cadDesigns.find(item => item.id === id);
             if (!design) return;
-            panelBody.innerHTML = renderCadDesignDetails(design);
+            sectionContent.innerHTML = renderCadDesignDetails(design);
+        } else if (type === "cad-document") {
+            sectionContent.innerHTML = renderCadGallery();
         } else if (type === "jewels") {
-            panelBody.innerHTML = renderSkJewels();
+            sectionContent.innerHTML = renderSkJewels();
         } else {
             const selectedEvent = attendedEvents.find(item => item.id === id);
             if (!selectedEvent) return;
-            panelBody.innerHTML = renderEventDetails(selectedEvent);
+            sectionContent.innerHTML = renderEventDetails(selectedEvent);
         }
 
-        panelBody.querySelector(
+        sectionContent.querySelector(
             `[data-gallery-open="${type}"][data-gallery-id="${id}"]`
         )?.focus();
         return;
@@ -1436,12 +1781,12 @@ panelBody.addEventListener("click", event => {
         const direction = Number(galleryStepButton.dataset.galleryStep);
         const nextIndex = (currentIndex + direction + images.length) % images.length;
 
-        panelBody.innerHTML = renderGalleryViewer(type, id, nextIndex);
-        panelBody.querySelector(`[data-gallery-step="-${direction}"]`)?.focus();
+        sectionContent.innerHTML = renderGalleryViewer(type, id, nextIndex);
+        sectionContent.querySelector(`[data-gallery-step="-${direction}"]`)?.focus();
     }
 });
 
-panelBody.addEventListener("submit", event => {
+pageContent?.addEventListener("submit", event => {
     if (!event.target.matches("#contact-form")) return;
 
     event.preventDefault();
@@ -1450,73 +1795,3 @@ panelBody.addEventListener("submit", event => {
     formStatus.textContent =
         "Your details are valid, but this form is not connected to a message service. Nothing was sent.";
 });
-
-document.addEventListener("keydown", event => {
-    if (event.key === "Escape" &&
-        destinationPanel.classList.contains("is-open")) {
-        closeDestinationPanel();
-    }
-});
-
-// Pointer interaction: mouse and touch.
-orbitContainer.addEventListener("pointerdown", event => {
-    if (event.target.closest(".orbit-item")) {
-        // Let button clicks select destinations.
-        return;
-    }
-
-    isDragging = true;
-    moved = false;
-    startX = event.clientX;
-    startRotation = rotation;
-
-    orbitContainer.classList.add("dragging");
-    orbitContainer.setPointerCapture(event.pointerId);
-});
-
-orbitContainer.addEventListener("pointermove", event => {
-    if (!isDragging) return;
-
-    const difference = event.clientX - startX;
-
-    if (Math.abs(difference) > 4) {
-        moved = true;
-    }
-
-    rotation = startRotation + difference * 0.55;
-    renderOrbit();
-});
-
-function stopDragging() {
-    if (!isDragging) return;
-
-    isDragging = false;
-    moved = false;
-    orbitContainer.classList.remove("dragging");
-}
-
-orbitContainer.addEventListener("pointerup", stopDragging);
-orbitContainer.addEventListener("pointercancel", stopDragging);
-
-// Select destinations.
-orbitItems.forEach(item => {
-    item.setAttribute("aria-pressed", "false");
-
-    item.addEventListener("click", event => {
-        if (moved) {
-            event.preventDefault();
-            moved = false;
-            return;
-        }
-
-        selectDestination(item);
-    });
-});
-
-// Responsive repositioning.
-window.addEventListener("resize", renderOrbit);
-
-// Initial setup.
-renderOrbit();
-
-console.log("JASH orbital navigation initialized!");
