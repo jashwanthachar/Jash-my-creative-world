@@ -20,7 +20,7 @@ destinations.
   atmospheric overlay.
 - **Interactive orbital navigation:** Drag the orbit horizontally to rotate
   its five destinations; select a destination by clicking or tapping.
-- **Five destinations:** About Me, Skills, Contact, My Links, and Socials
+- **Five destinations:** About Me, Skills, Contact, My Projects, and Socials
   use the existing shared destination panel.
 - **About Me experience:** An introduction, Computer Science Engineering
   journey, interests, technical skills, selected projects, and future
@@ -33,8 +33,15 @@ destinations.
   available in the Contact destination, including email, phone, LinkedIn, and
   GitHub links. The form is a frontend prototype and does not send or store
   submissions until a backend or form service is configured.
-- **Responsive presentation:** The layout adapts to smaller screens, and the
-  About Me content changes to a single-column layout on narrow viewports.
+- **My Projects experience:** Four sections organize software projects,
+  SK JEWELS, jewellery CAD work, and attended events. Project and event details
+  are data-driven; missing images, dates, organizers, certificates, and links
+  are shown as placeholders rather than invented.
+- **Jewellery design showcase:** CAD work is grouped by design category and
+  supports image galleries when project images are added locally.
+- **Responsive presentation:** The layout adapts to smaller screens, switches
+  to the mobile floating-world background, and changes multi-column content
+  layouts to fit narrow viewports.
 - **Accessibility details:** Destination selection updates pressed states;
   the panel can be closed with Escape, returns focus to the selected
   destination, and respects reduced-motion preferences.
@@ -68,6 +75,12 @@ JASH-CREATIVE-WORLD/
 │   │       └── python.svg
 │   └── images/
 │       ├── .gitkeep
+│       ├── cad/
+│       │   └── .gitkeep
+│       ├── events/
+│       │   └── .gitkeep
+│       ├── sk-jewels/
+│       │   └── .gitkeep
 │       ├── background-world1.png
 │       └── background-world2.png
 ├── assets/certificates/
@@ -81,9 +94,9 @@ JASH-CREATIVE-WORLD/
 └── README.md
 ```
 
-`background-world1.png` is used as the page background. The second image is
-present in the repository but is not currently referenced by the website.
-Technology logo SVGs are stored locally and sourced from
+`background-world1.png` is used for larger screens and
+`background-world2.png` for screens up to 767 pixels wide. Technology logo
+SVGs are stored locally and sourced from
 [Devicon](https://github.com/devicons/devicon). The project does not currently
 include screenshots or certificate files.
 
@@ -119,16 +132,16 @@ information that should not be public.
 ## Current development status
 
 The core portfolio shell, orbital interaction, shared destination panel,
-About Me experience, Skills showcase, and Contact form prototype are
-implemented. The Contact form does not transmit submissions. My Links and
-Socials currently contain introductory placeholder content rather than their
-full planned experiences.
+About Me experience, Skills showcase, Contact form prototype, and My Projects
+sections are implemented. The Contact form does not transmit submissions.
+Some project imagery, event records, and certificate information remain
+placeholders until verified details and assets are added. Socials currently
+contains introductory placeholder content.
 
 ## Roadmap
 
 - Add verified skill topics, practical work, and certificate records.
-- Add confirmed email and LinkedIn details and connect a backend or form
-  service for Contact submissions.
-- Add project details and confirmed professional links.
+- Add project imagery, source/demo links, and confirmed event details.
+- Connect a backend or form service for Contact submissions.
 - Add confirmed social profile information.
 - Continue refining transitions, animation, and responsive behavior.
